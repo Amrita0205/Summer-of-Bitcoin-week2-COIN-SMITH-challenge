@@ -368,7 +368,6 @@ The hidden evaluation covers at least these categories. You don't know the exact
 - RBF/locktime: `nSequence` and `nLockTime` in the PSBT unsigned transaction match the interaction matrix for the given fixture fields
 - Report includes correct `rbf_signaling`, `locktime`, and `locktime_type` values
 - Tests pass (`grade.sh`)
-- Week 1 acceptance tests still pass (regressions are penalized)
 - Demo video link is included in `demo.md` at the repository root (the file should contain only the link):
   - **Where to upload:** YouTube, Loom, or Google Drive. The link must be viewable by evaluators without requesting access (public or unlisted is fine; no “request access” links).
   - **What to record:** a screen recording of your **web UI** walkthrough (no code walkthrough; don’t spend time scrolling through source files).
