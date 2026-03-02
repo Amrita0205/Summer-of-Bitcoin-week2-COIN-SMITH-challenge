@@ -4,24 +4,16 @@ set -euo pipefail
 ###############################################################################
 # web.sh — Coin Smith: PSBT builder web UI and visualizer
 #
-# Starts the web server for the PSBT transaction builder.
-#
 # Behavior:
 #   - Reads PORT env var (default: 3000)
-#   - Prints the URL (e.g., http://127.0.0.1:3000) to stdout
+#   - Prints the URL (e.g., http://127.0.0.1:3000) to stdout  ← required
 #   - Keeps running until terminated (CTRL+C / SIGTERM)
-#   - Must serve GET /api/health -> 200 { "ok": true }
-#
-# TODO: Replace the stub below with your web server start command.
+#   - Serves GET /api/health → 200 { "ok": true }
+#   - Serves POST /api/build → accepts fixture JSON, returns report JSON
 ###############################################################################
 
-PORT="${PORT:-3000}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PORT="${PORT:-3000}"
 
-# TODO: Start your web server here, for example:
-#   exec node server.js
-#   exec python -m http.server "$PORT"
-#   exec cargo run --release -- --port "$PORT"
-
-echo "Error: Web visualizer is not yet implemented" >&2
-echo "Set up your web server to listen on port $PORT" >&2
-exit 1
+# Python web server prints the URL itself (to stdout) before starting
+exec python3 "$SCRIPT_DIR/web.py"
