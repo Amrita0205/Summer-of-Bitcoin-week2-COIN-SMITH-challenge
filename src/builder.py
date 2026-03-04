@@ -137,7 +137,7 @@ def validate_fixture(fixture: dict) -> None:
             bytes.fromhex(u['txid'])
         except ValueError:
             raise ValueError(f"INVALID_FIXTURE: utxo[{i}].txid is not valid hex")
-        if not isinstance(u['value_sats'], int) or u['value_sats'] <= 0:
+        if not isinstance(u['value_sats'], (int, float)) or u['value_sats'] <= 0 or u['value_sats'] != int(u['value_sats']):
             raise ValueError(f"INVALID_FIXTURE: utxo[{i}].value_sats must be positive integer")
         if not isinstance(u['vout'], int) or u['vout'] < 0:
             raise ValueError(f"INVALID_FIXTURE: utxo[{i}].vout must be non-negative integer")
@@ -154,7 +154,7 @@ def validate_fixture(fixture: dict) -> None:
         for field in ('script_pubkey_hex', 'value_sats'):
             if field not in p:
                 raise ValueError(f"INVALID_FIXTURE: payment[{i}] missing field '{field}'")
-        if not isinstance(p['value_sats'], int) or p['value_sats'] <= 0:
+        if not isinstance(p['value_sats'], (int, float)) or p['value_sats'] <= 0 or p['value_sats'] != int(p['value_sats']):
             raise ValueError(f"INVALID_FIXTURE: payment[{i}].value_sats must be positive integer")
         try:
             bytes.fromhex(p['script_pubkey_hex'])
@@ -193,8 +193,14 @@ def select_coins(fixture: dict) -> dict:
 
     fee_rate    = float(fixture['fee_rate_sat_vb'])
     network     = fixture.get('network', 'mainnet')
-    policy      = fixture.get('policy', {}) or {}
+    policy      = fixture.get('policy') or {}
     max_inputs  = policy.get('max_inputs', None)
+
+    # Coerce value_sats to int (some fixtures may send 100000.0)
+    for u in utxos:
+        u['value_sats'] = int(u['value_sats'])
+    for p in payments:
+        p['value_sats'] = int(p['value_sats'])
 
     # Resolve script types — prefer explicit fixture value, fall back to detection.
     # This is critical: p2sh-p2wpkh looks identical to p2sh at the byte level.
@@ -304,14 +310,19 @@ def select_coins(fixture: dict) -> dict:
 
     # ── Warnings ──────────────────────────────────────────────────────────────
     warnings = []
+    seen_codes = set()
+    def _warn(code):
+        if code not in seen_codes:
+            seen_codes.add(code)
+            warnings.append({'code': code})
     if fee_sats > 1_000_000 or actual_rate > 200:
-        warnings.append({'code': 'HIGH_FEE'})
+        _warn('HIGH_FEE')
     if not result['has_change']:
-        warnings.append({'code': 'SEND_ALL'})
+        _warn('SEND_ALL')
     if result['has_change'] and result['change_sats'] < DUST_THRESHOLD:
-        warnings.append({'code': 'DUST_CHANGE'})
+        _warn('DUST_CHANGE')
     if rbf_signaling:
-        warnings.append({'code': 'RBF_SIGNALING'})
+        _warn('RBF_SIGNALING')
 
     # ── Final report ──────────────────────────────────────────────────────────
     return {

@@ -208,6 +208,26 @@ textarea:focus { background: #090909; }
 .build-btn:disabled       { opacity: 0.3; cursor: not-allowed; }
 .build-btn:disabled::before { display: none; }
 
+.clear-btn {
+  width: 100%;
+  padding: 7px;
+  margin-top: 6px;
+  background: transparent;
+  border: 1px solid rgba(224, 82, 82, 0.4);
+  color: rgba(224, 82, 82, 0.7);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.clear-btn:hover {
+  border-color: #e05252;
+  color: #e05252;
+  background: rgba(224, 82, 82, 0.05);
+}
+
 #status-line {
   margin-top: 8px;
   font-size: 10px;
@@ -433,32 +453,43 @@ textarea:focus { background: #090909; }
 .psbt-wrap {
   background: var(--surface);
   border: 1px solid var(--border2);
-  padding: 10px 12px;
-  position: relative;
+  overflow: hidden;
 }
 .psbt-text {
   font-size: 9px;
   color: #3a6e3a;
   word-break: break-all;
   line-height: 1.6;
-  max-height: 64px;
-  overflow: hidden;
-  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+  max-height: 130px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a #0e0e0e;
 }
+.psbt-text::-webkit-scrollbar { width: 4px; }
+.psbt-text::-webkit-scrollbar-track { background: #0e0e0e; }
+.psbt-text::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+.psbt-text::-webkit-scrollbar-thumb:hover { background: var(--amber2); }
 .psbt-copy {
-  position: absolute;
-  top: 8px; right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 9px;
   background: transparent;
-  border: 1px solid var(--border2);
+  border: none;
+  border-top: 1px solid var(--border2);
   color: var(--muted);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 1px;
-  padding: 2px 7px;
+  font-size: 10px;
+  letter-spacing: 2px;
   cursor: pointer;
   text-transform: uppercase;
+  transition: background 0.2s, color 0.2s;
 }
-.psbt-copy:hover { border-color: var(--amber); color: var(--amber); }
+.psbt-copy:hover { background: rgba(245,166,35,0.06); color: var(--amber); border-top-color: var(--amber2); }
+.psbt-copy .copy-icon { font-size: 11px; opacity: 0.7; }
 
 .err-block {
   border: 1px solid #3a1010;
@@ -498,6 +529,7 @@ textarea:focus { background: #090909; }
       <button class="build-btn" id="build-btn" onclick="buildPSBT()">
         <span>&#9656; BUILD PSBT</span>
       </button>
+      <button class="clear-btn" onclick="clearAll()">&#x2715; CLEAR</button>
       <div id="status-line"></div>
     </div>
 
@@ -695,9 +727,11 @@ function renderResult(d) {
     <div class="section">
       <div class="sec-head">// PSBT BASE64</div>
       <div class="psbt-wrap">
-        <button class="psbt-copy" onclick="copyPsbt()">COPY</button>
-        <div class="psbt-text" id="psbt-data">${esc(d.psbt_base64)}</div>
-      </div>
+  <div class="psbt-text" id="psbt-data">${esc(d.psbt_base64)}</div>
+  <button class="psbt-copy" onclick="copyPsbt()">
+    <span class="copy-icon">&#x2398;</span> COPY TO CLIPBOARD
+  </button>
+</div>
     </div>`;
 
   document.getElementById('results-pane').innerHTML =
@@ -707,10 +741,35 @@ function renderResult(d) {
 }
 
 function copyPsbt() {
-  if (window._psbt) {
-    navigator.clipboard.writeText(window._psbt)
-      .then(() => setStatus('> psbt copied to clipboard', '#4caf7d'));
-  }
+  if (!window._psbt) return;
+  navigator.clipboard.writeText(window._psbt).then(() => {
+    setStatus('> psbt copied to clipboard', '#4caf7d');
+    const btn = document.querySelector('.psbt-copy');
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<span class="copy-icon">&#x2713;</span> COPIED';
+      btn.style.color = '#4caf7d';
+      btn.style.borderTopColor = '#2a4a36';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.style.color = '';
+        btn.style.borderTopColor = '';
+      }, 2000);
+    }
+  });
+}
+
+function clearAll() {
+  document.getElementById('fixture-input').value = '';
+  const sl = document.getElementById('status-line');
+  sl.textContent = '';
+  sl.style.color = '';
+  document.getElementById('results-pane').innerHTML = `
+    <div class="empty">
+      <div class="empty-glyph">₿</div>
+      <div class="empty-text">AWAITING FIXTURE INPUT</div>
+    </div>`;
+  window._psbt = null;
 }
 </script>
 </body>
@@ -732,10 +791,18 @@ def build():
     try:
         fixture = request.get_json(force=True, silent=True)
         if fixture is None:
-            return jsonify({
-                'ok': False,
-                'error': {'code': 'INVALID_FIXTURE', 'message': 'Request body is not valid JSON'}
-            }), 400
+            return (
+                jsonify(
+                    {
+                        'ok': False,
+                        'error': {
+                            'code': 'INVALID_FIXTURE',
+                            'message': 'Request body is not valid JSON'
+                        }
+                    }
+                ),
+                400
+            )
 
         validate_fixture(fixture)
         report = select_coins(fixture)
@@ -751,10 +818,12 @@ def build():
 
     except Exception as e:
         traceback.print_exc(file=sys.stderr)
-        return jsonify({
-            'ok': False,
-            'error': {'code': 'INTERNAL_ERROR', 'message': str(e)}
-        }), 500
+        return (
+            jsonify(
+                {'ok': False, 'error': {'code': 'INTERNAL_ERROR', 'message': str(e)}}
+            ),
+            500
+        )
 
 
 if __name__ == '__main__':
