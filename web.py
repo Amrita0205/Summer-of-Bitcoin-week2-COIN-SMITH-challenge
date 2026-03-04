@@ -132,17 +132,53 @@ header::after {
 
 /* ── Layout ── */
 .workspace {
-  display: grid;
-  grid-template-columns: 420px 1fr;
+  display: flex;
   height: calc(100vh - 48px);
+  overflow: hidden;
 }
 
 /* ── Left panel ── */
 .left {
-  border-right: 1px solid var(--border2);
+  flex-shrink: 0;
+  width: 420px;
+  min-width: 220px;
+  max-width: 70vw;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* ── Claude-style resize divider ── */
+.divider {
+  flex-shrink: 0;
+  width: 1px;
+  background: var(--border2);
+  cursor: col-resize;
+  position: relative;
+  transition: background 0.2s;
+  user-select: none;
+}
+.divider:hover,
+.divider.dragging {
+  background: #3a3a3a;
+}
+/* the pill grip in the center */
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 24px;
+  background: var(--border2);
+  border-radius: 9999px;
+  transition: background 0.2s, height 0.2s;
+}
+.divider:hover::after,
+.divider.dragging::after {
+  background: var(--muted);
+  height: 32px;
 }
 
 .panel-label {
@@ -266,6 +302,8 @@ textarea:focus { background: #090909; }
 
 /* ── Right panel ── */
 .right {
+  flex: 1;
+  min-width: 0;
   overflow-y: auto;
   padding: 20px 24px;
   background: var(--bg);
@@ -547,6 +585,9 @@ textarea:focus { background: #090909; }
     </div>
   </div>
 
+  <!-- DIVIDER -->
+  <div class="divider" id="divider"></div>
+
   <!-- RIGHT: results -->
   <div class="right" id="results-pane">
     <div class="empty">
@@ -727,11 +768,11 @@ function renderResult(d) {
     <div class="section">
       <div class="sec-head">// PSBT BASE64</div>
       <div class="psbt-wrap">
-  <div class="psbt-text" id="psbt-data">${esc(d.psbt_base64)}</div>
-  <button class="psbt-copy" onclick="copyPsbt()">
-    <span class="copy-icon">&#x2398;</span> COPY TO CLIPBOARD
-  </button>
-</div>
+        <div class="psbt-text" id="psbt-data">${esc(d.psbt_base64)}</div>
+        <button class="psbt-copy" onclick="copyPsbt()">
+          <span class="copy-icon">&#x2398;</span> COPY TO CLIPBOARD
+        </button>
+      </div>
     </div>`;
 
   document.getElementById('results-pane').innerHTML =
@@ -750,11 +791,7 @@ function copyPsbt() {
       btn.innerHTML = '<span class="copy-icon">&#x2713;</span> COPIED';
       btn.style.color = '#4caf7d';
       btn.style.borderTopColor = '#2a4a36';
-      setTimeout(() => {
-        btn.innerHTML = orig;
-        btn.style.color = '';
-        btn.style.borderTopColor = '';
-      }, 2000);
+      setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; btn.style.borderTopColor = ''; }, 2000);
     }
   });
 }
@@ -762,8 +799,7 @@ function copyPsbt() {
 function clearAll() {
   document.getElementById('fixture-input').value = '';
   const sl = document.getElementById('status-line');
-  sl.textContent = '';
-  sl.style.color = '';
+  sl.textContent = ''; sl.style.color = '';
   document.getElementById('results-pane').innerHTML = `
     <div class="empty">
       <div class="empty-glyph">₿</div>
@@ -771,6 +807,39 @@ function clearAll() {
     </div>`;
   window._psbt = null;
 }
+
+// ── Resizable divider ──────────────────────────────────────────────────────
+(function() {
+  const divider  = document.getElementById('divider');
+  const leftPane = document.querySelector('.left');
+  let dragging = false, startX = 0, startW = 0;
+
+  divider.addEventListener('mousedown', e => {
+    dragging = true;
+    startX   = e.clientX;
+    startW   = leftPane.getBoundingClientRect().width;
+    divider.classList.add('dragging');
+    document.body.style.cursor     = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const newW = Math.min(Math.max(startW + (e.clientX - startX), 220), window.innerWidth * 0.70);
+    leftPane.style.width = newW + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    divider.classList.remove('dragging');
+    document.body.style.cursor     = '';
+    document.body.style.userSelect = '';
+  });
+
+  divider.addEventListener('dblclick', () => { leftPane.style.width = '420px'; });
+})();
 </script>
 </body>
 </html>"""

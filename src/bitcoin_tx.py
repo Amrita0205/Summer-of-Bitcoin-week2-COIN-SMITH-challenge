@@ -104,7 +104,7 @@ def resolve_script_type(utxo_or_output: dict) -> str:
 
 def is_segwit(stype: str) -> bool:
     """Return True for native segwit and wrapped segwit (p2sh-p2wpkh) types."""
-    return stype in ("p2wpkh", "p2wsh", "p2tr", "p2sh-p2wpkh", "p2sh_p2wpkh")
+    return stype.replace("_", "-") in ("p2wpkh", "p2wsh", "p2tr", "p2sh-p2wpkh")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -177,6 +177,11 @@ _TX_OVERHEAD_WU  = 10 * 4   # version + vin_count + vout_count + locktime
 _SEGWIT_MARKER_WU = 2        # marker(1) + flag(1) counted as witness bytes
 
 
+def _norm(stype: str) -> str:
+    """Normalize script type: lowercase + dash form."""
+    return stype.lower().replace("_", "-") if stype else "unknown"
+
+
 def estimate_vbytes(inputs: list, outputs: list) -> int:
     """
     Estimate transaction virtual size in bytes (ceiling).
@@ -191,12 +196,12 @@ def estimate_vbytes(inputs: list, outputs: list) -> int:
         total_wu += _SEGWIT_MARKER_WU
 
     for inp in inputs:
-        stype = inp.get("script_type", "unknown")
+        stype = _norm(inp.get("script_type", "unknown"))
         nw_extra, wit = _INPUT_WU.get(stype, _INPUT_WU["unknown"])
         total_wu += _INPUT_BASE_WU + nw_extra + wit
 
     for out in outputs:
-        stype = out.get("script_type", "unknown")
+        stype = _norm(out.get("script_type", "unknown"))
         total_wu += _OUTPUT_WU.get(stype, _OUTPUT_WU["unknown"])
 
     return math.ceil(total_wu / 4)
@@ -318,7 +323,7 @@ def build_psbt_b64(selected_inputs: list, outputs: list,
 
     # Per-input maps
     for utxo in selected_inputs:
-        stype = utxo.get('script_type', 'unknown')
+        stype = _norm(utxo.get('script_type', 'unknown'))
         spk   = bytes.fromhex(utxo['script_pubkey_hex'])
 
         if stype in ('p2sh-p2wpkh', 'p2sh_p2wpkh'):

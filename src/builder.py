@@ -137,7 +137,7 @@ def validate_fixture(fixture: dict) -> None:
             bytes.fromhex(u['txid'])
         except ValueError:
             raise ValueError(f"INVALID_FIXTURE: utxo[{i}].txid is not valid hex")
-        if not isinstance(u['value_sats'], (int, float)) or u['value_sats'] <= 0 or u['value_sats'] != int(u['value_sats']):
+        if not isinstance(u['value_sats'], (int, float)) or u['value_sats'] <= 0 or int(u['value_sats']) != u['value_sats']:
             raise ValueError(f"INVALID_FIXTURE: utxo[{i}].value_sats must be positive integer")
         if not isinstance(u['vout'], int) or u['vout'] < 0:
             raise ValueError(f"INVALID_FIXTURE: utxo[{i}].vout must be non-negative integer")
@@ -154,7 +154,7 @@ def validate_fixture(fixture: dict) -> None:
         for field in ('script_pubkey_hex', 'value_sats'):
             if field not in p:
                 raise ValueError(f"INVALID_FIXTURE: payment[{i}] missing field '{field}'")
-        if not isinstance(p['value_sats'], (int, float)) or p['value_sats'] <= 0 or p['value_sats'] != int(p['value_sats']):
+        if not isinstance(p['value_sats'], (int, float)) or p['value_sats'] <= 0 or int(p['value_sats']) != p['value_sats']:
             raise ValueError(f"INVALID_FIXTURE: payment[{i}].value_sats must be positive integer")
         try:
             bytes.fromhex(p['script_pubkey_hex'])
@@ -166,6 +166,22 @@ def validate_fixture(fixture: dict) -> None:
         bytes.fromhex(change['script_pubkey_hex'])
     except (ValueError, TypeError):
         raise ValueError("INVALID_FIXTURE: change.script_pubkey_hex is not valid hex")
+
+    # Validate optional locktime / current_height are valid uint32
+    for field in ('locktime', 'current_height'):
+        val = fixture.get(field, None)
+        if val is not None:
+            try:
+                v = int(val)
+            except (TypeError, ValueError):
+                raise ValueError(f"INVALID_FIXTURE: '{field}' must be an integer")
+            if not (0 <= v <= 0xFFFFFFFF):
+                raise ValueError(f"INVALID_FIXTURE: '{field}' must be in range 0-4294967295")
+
+    # Validate rbf is boolean if present (not int 1/0)
+    rbf_val = fixture.get('rbf', None)
+    if rbf_val is not None and not isinstance(rbf_val, bool):
+        raise ValueError("INVALID_FIXTURE: 'rbf' must be a boolean true/false")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -196,9 +212,10 @@ def select_coins(fixture: dict) -> dict:
     policy      = fixture.get('policy') or {}
     max_inputs  = policy.get('max_inputs', None)
 
-    # Coerce value_sats to int (some fixtures may send 100000.0)
+    # Coerce numeric fields to correct types (fixtures may send floats)
     for u in utxos:
         u['value_sats'] = int(u['value_sats'])
+        u['vout']       = int(u['vout'])
     for p in payments:
         p['value_sats'] = int(p['value_sats'])
 
@@ -250,7 +267,7 @@ def select_coins(fixture: dict) -> dict:
 
         # ── Case B: no change (send-all / absorb as fee) ─────────────────────
         vb_no_change  = estimate_vbytes(selected, payment_out_types)
-        fee_no_change = math.ceil(vb_no_change * fee_rate)
+        fee_no_change = max(math.ceil(vb_no_change * fee_rate), 0)
         leftover      = running_total - payment_total
 
         if leftover >= fee_no_change:
@@ -310,10 +327,10 @@ def select_coins(fixture: dict) -> dict:
 
     # ── Warnings ──────────────────────────────────────────────────────────────
     warnings = []
-    seen_codes = set()
+    _seen_warn = set()
     def _warn(code):
-        if code not in seen_codes:
-            seen_codes.add(code)
+        if code not in _seen_warn:
+            _seen_warn.add(code)
             warnings.append({'code': code})
     if fee_sats > 1_000_000 or actual_rate > 200:
         _warn('HIGH_FEE')
