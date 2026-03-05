@@ -1,0 +1,30 @@
+{
+  "network": "mainnet",
+  "utxos": [
+    {
+      "txid": "fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafaf0f0",
+      "vout": 0,
+      "value_sats": 51251,
+      "script_pubkey_hex": "0014c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1",
+      "script_type": "p2wpkh",
+      "address": "bc1qc8pu8pu8qc8pu8pu8qc8pu8pu8qc8pu8pz7k7d"
+    }
+  ],
+  "payments": [
+    {
+      "address": "bc1qcwru3d6wcwru3d6wcwru3d6wcwru3d6wjw32da",
+      "script_pubkey_hex": "0014c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2",
+      "script_type": "p2wpkh",
+      "value_sats": 50000
+    }
+  ],
+  "change": {
+    "address": "bc1qce0g3tpqce0g3tpqce0g3tpqce0g3tp7dnc64",
+    "script_pubkey_hex": "0014c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3",
+    "script_type": "p2wpkh"
+  },
+  "fee_rate_sat_vb": 5,
+  "policy": {
+    "max_inputs": 5
+  }
+}

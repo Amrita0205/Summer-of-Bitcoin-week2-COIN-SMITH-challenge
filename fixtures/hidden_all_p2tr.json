@@ -1,0 +1,38 @@
+{
+  "network": "mainnet",
+  "utxos": [
+    {
+      "txid": "f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8",
+      "vout": 0,
+      "value_sats": 200000,
+      "script_pubkey_hex": "5120a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+      "script_type": "p2tr",
+      "address": "bc1p5xs6rgdp5xs6rgdp5xs6rgdp5xs6rgdp5xs6rgdp5xs6rgdp5xss9x2r3"
+    },
+    {
+      "txid": "f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8",
+      "vout": 1,
+      "value_sats": 150000,
+      "script_pubkey_hex": "5120a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+      "script_type": "p2tr",
+      "address": "bc1p52329g4z52329g4z52329g4z52329g4z52329g4z52329g4z5232sshg2x"
+    }
+  ],
+  "payments": [
+    {
+      "address": "bc1pa3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3swq0l9",
+      "script_pubkey_hex": "5120a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3",
+      "script_type": "p2tr",
+      "value_sats": 250000
+    }
+  ],
+  "change": {
+    "address": "bc1pa4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a48n4e5e",
+    "script_pubkey_hex": "5120a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4",
+    "script_type": "p2tr"
+  },
+  "fee_rate_sat_vb": 5,
+  "policy": {
+    "max_inputs": 5
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "network": "mainnet",
+  "utxos": [
+    {
+      "txid": "f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7",
+      "vout": 0,
+      "value_sats": 5000,
+      "script_pubkey_hex": "0014aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1",
+      "script_type": "p2wpkh",
+      "address": "bc1q42222222222222222222222222222222wqc4q3"
+    },
+    {
+      "txid": "f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7",
+      "vout": 1,
+      "value_sats": 10000,
+      "script_pubkey_hex": "0014aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa2",
+      "script_type": "p2wpkh",
+      "address": "bc1q42222222222222222222222222222222u9j2nt"
+    },
+    {
+      "txid": "f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7",
+      "vout": 2,
+      "value_sats": 100000,
+      "script_pubkey_hex": "0014aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa3",
+      "script_type": "p2wpkh",
+      "address": "bc1q42222222222222222222222222222222yxyrm6"
+    },
+    {
+      "txid": "f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7",
+      "vout": 3,
+      "value_sats": 3000,
+      "script_pubkey_hex": "0014aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa4",
+      "script_type": "p2wpkh",
+      "address": "bc1q422222222222222222222222222222229fq3j6"
+    },
+    {
+      "txid": "f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7",
+      "vout": 4,
+      "value_sats": 50000,
+      "script_pubkey_hex": "0014aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa5",
+      "script_type": "p2wpkh",
+      "address": "bc1q42222222222222222222222222222222gpxahz"
+    }
+  ],
+  "payments": [
+    {
+      "address": "bc1q4bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbm03s8n",
+      "script_pubkey_hex": "0014abababababababababababababababababababab",
+      "script_type": "p2wpkh",
+      "value_sats": 60000
+    }
+  ],
+  "change": {
+    "address": "bc1q4cccccccccccccccccccccccccccccccc88qe2y",
+    "script_pubkey_hex": "0014acacacacacacacacacacacacacacacacacacacac",
+    "script_type": "p2wpkh"
+  },
+  "fee_rate_sat_vb": 5,
+  "policy": {
+    "max_inputs": 1
+  }
+}
