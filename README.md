@@ -1,6 +1,12 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/bK2yja45)
 # Week 2 Challenge: Coin Smith
 
+## 🎥 Demo video
+
+[![Coin Smith demo video](https://img.youtube.com/vi/UiFWWvqCxC4/hqdefault.jpg)](https://www.youtube.com/watch?v=UiFWWvqCxC4)
+
+▶️ **[Watch on YouTube](https://www.youtube.com/watch?v=UiFWWvqCxC4)**: loading a fixture, building a PSBT, and walking through the chosen inputs and outputs.
+
 Build a **safe PSBT transaction builder** that:
 
 - selects coins (UTXOs),
